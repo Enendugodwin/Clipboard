@@ -3,7 +3,7 @@ import { useToast } from '../components/Toast';
 
 export function SettingsPage() {
   const { push } = useToast();
-  const [expiry, setExpiry] = useState(localStorage.getItem('clip-default-expiry') || '24h');
+  const [expiry, setExpiry] = useState(localStorage.getItem('clip-default-expiry') || '1h');
   const [name, setName] = useState(localStorage.getItem('clip-default-name') || '');
   const [privacy, setPrivacy] = useState(localStorage.getItem('clip-default-privacy') || 'public');
   const [retention, setRetention] = useState(localStorage.getItem('clip-retention') || 'room');

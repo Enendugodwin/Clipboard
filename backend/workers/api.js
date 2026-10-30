@@ -234,7 +234,7 @@ export default {
     }
 
     if (path === '/api/rooms' && request.method === 'POST') {
-      const { name, expiresIn, customTtlSec, password, isPrivate } = body || {};
+      const { name, expiresIn = '1h', customTtlSec, password, isPrivate } = body || {};
       if (customTtlSec != null && (customTtlSec < 60 || customTtlSec > 7 * 86400)) return json(env, { error: 'customTtlSec must be 60..604800' }, 400);
       if (password && String(password).length < 4) return json(env, { error: 'Password too short (min 4 chars).' }, 400);
       const ttl = customTtlSec || EXPIRY_OPTIONS[expiresIn] || 86400;

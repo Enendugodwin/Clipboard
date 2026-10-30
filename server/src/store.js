@@ -56,7 +56,7 @@ function getRoom(code) {
 }
 function isExpired(room) { return room && room.expires_at && room.expires_at < now(); }
 
-function createRoom({ name, expiresIn = '24h', customTtlSec, password, isPrivate }) {
+function createRoom({ name, expiresIn = '1h', customTtlSec, password, isPrivate }) {
   const code = roomCode();
   const ttl = customTtlSec || EXPIRY_OPTIONS[expiresIn] || 86400;
   const room = {

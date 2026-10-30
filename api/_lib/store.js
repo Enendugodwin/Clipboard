@@ -69,7 +69,7 @@ async function trackCode(code, add) {
   return next;
 }
 
-async function createRoom({ name, expiresIn = '24h', customTtlSec, password, isPrivate }) {
+async function createRoom({ name, expiresIn = '1h', customTtlSec, password, isPrivate }) {
   const code = roomCode();
   const ttl = customTtlSec || EXPIRY_OPTIONS[expiresIn] || 86400;
   const t = now();
