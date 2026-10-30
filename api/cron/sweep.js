@@ -1,9 +1,9 @@
 'use strict';
 // Vercel Cron: sweep expired rooms (KV + Blob). Runs daily; reads are also
 // lazily guarded with 410, so this is cleanup, not enforcement.
-const { kv } = require('@vercel/kv');
 const { del } = require('@vercel/blob');
 const S = require('../_lib/store');
+const { kv } = S;
 
 module.exports = async function handler(req, res) {
   if (process.env.CRON_SECRET && req.headers.authorization !== `Bearer ${process.env.CRON_SECRET}`) {

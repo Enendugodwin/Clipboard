@@ -3,9 +3,9 @@
 // Realtime note: serverless has no WebSockets — clients poll (frontend socket
 // service switches to polling when VITE_WS_URL=poll). Mutations return the
 // new version so pollers converge without refresh.
-const { kv } = require('@vercel/kv');
 const { put, del } = require('@vercel/blob');
 const S = require('./_lib/store');
+const { kv } = S;
 
 const MAX_CONTENT = () => parseInt(process.env.MAX_CONTENT_BYTES || '500000', 10);
 const MAX_FILE = () => parseInt(process.env.MAX_FILE_BYTES || '26214400', 10);
