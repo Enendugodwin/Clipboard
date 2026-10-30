@@ -1,6 +1,6 @@
 {
-  "installCommand": "npm install && npm run install:all",
-  "buildCommand": "npm run build",
+  "installCommand": "npm install && npm install --prefix server && npm install --prefix frontend",
+  "buildCommand": "npm run build --prefix frontend",
   "outputDirectory": "frontend/dist",
   "rewrites": [
     { "source": "/c/:code*", "destination": "/" },
