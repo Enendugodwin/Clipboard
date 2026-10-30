@@ -23,6 +23,8 @@ export function useRoomSocket(code: string | undefined, onEvent: (msg: any) => v
       if (!res.ok) { setState('Connected'); return; }
       const d = await res.json();
       if (versionRef.current === null) { versionRef.current = d.version; setState('Connected'); return; }
+      if (typeof d.version !== 'number') { setState('Connected'); return; }
+      if (d.version < versionRef.current) return; // stale response arriving out of order: ignore, never rewind
       if (d.version !== versionRef.current) {
         versionRef.current = d.version;
         setState('Synced');
