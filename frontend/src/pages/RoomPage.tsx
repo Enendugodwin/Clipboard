@@ -22,11 +22,12 @@ export function RoomPage({ onToast, onConn }: { onToast: (m: string, k?: any) =>
   const [showQR, setShowQR] = useState(false);
   const [histKey, setHistKey] = useState(0);
   const [opState, setOpState] = useState('');
-  const saveTimer = useRef<number | undefined>(undefined);
+  const [dirty, setDirty] = useState(false);
+  const savingRef = useRef(false);
 
   const onEvent = useCallback((msg: any) => {
-    if (msg.type === 'clipboard.updated') { setText(msg.content); setVersion(msg.version); setHistKey((k) => k + 1); onToast('Synced update received', 'success'); }
-    if (msg.type === 'clipboard.cleared') { setText(''); setVersion(msg.version); }
+    if (msg.type === 'clipboard.updated') { setText(msg.content); setVersion(msg.version); setDirty(false); setHistKey((k) => k + 1); onToast('Synced update received', 'success'); }
+    if (msg.type === 'clipboard.cleared') { setText(''); setVersion(msg.version); setDirty(false); }
     if (msg.type === 'room.expired') { onToast('Room expired', 'error'); setRoom(null); }
   }, [onToast]);
 
@@ -48,23 +49,25 @@ export function RoomPage({ onToast, onConn }: { onToast: (m: string, k?: any) =>
   useEffect(() => { load(); }, [load]);
 
   const save = async (value: string) => {
-    if (!room) return;
+    if (!room || savingRef.current) return;
+    savingRef.current = true;
     setState('Syncing'); setOpState('Syncing…');
     try {
       const r = await api.putClipboard(code, { content: value, content_type: 'text', base_version: version });
-      setVersion(r.version); setState('Synced'); setOpState(`Synced · v${r.version}`);
+      setVersion(r.version); setDirty(false); setState('Synced'); setOpState(`Synced · v${r.version}`);
       setHistKey((k) => k + 1);
       localStorage.removeItem(`clip-outbox-${code}`);
     } catch (e: any) {
       if (!navigator.onLine) { localStorage.setItem(`clip-outbox-${code}`, value); setState('Offline'); }
       else setState('Connected');
       onToast(e.message, 'error');
+    } finally {
+      savingRef.current = false;
     }
   };
   const onChange = (v: string) => {
     setText(v);
-    window.clearTimeout(saveTimer.current);
-    saveTimer.current = window.setTimeout(() => save(v), 800);
+    setDirty(true);
   };
 
   if (needPw) return (
@@ -91,12 +94,13 @@ export function RoomPage({ onToast, onConn }: { onToast: (m: string, k?: any) =>
       <div className="flex items-center gap-2 flex-wrap">
         <h1 className="text-xl font-semibold text-ink dark:text-white">{room.room_name}</h1>
         <span className="text-xs text-ink/60 dark:text-white/60">{code} · v{version} · {expiryLabel(room.expires_at)}</span>
-        <span className="text-xs text-ink/60 dark:text-white/60 ml-auto" role="status">{opState || state}</span>
+        <span className="text-xs text-ink/60 dark:text-white/60 ml-auto" role="status">{opState || (dirty ? 'Unsaved changes' : state)}</span>
       </div>
       <textarea value={text} onChange={(e) => onChange(e.target.value)} placeholder="Paste anything here…" rows={7} className="w-full border border-ink/30 dark:border-white rounded-lg p-3 text-sm bg-paper dark:bg-black text-ink dark:text-white shadow-soft" />
       <div className="flex flex-wrap gap-2">
+        <button onClick={() => save(text)} disabled={!dirty} title={dirty ? 'Push your edits to all devices' : 'Everything is already synced'} className={`flex items-center gap-1 text-sm rounded-md px-4 py-1.5 font-medium border ${dirty ? 'bg-moss-deep dark:bg-white text-[#f7f4ec] dark:text-black border-moss-deep dark:border-white' : 'border-ink/30 dark:border-white text-ink/60 dark:text-white/60'}`}><Share2 size={14} /> {dirty ? 'Sync now' : 'Synced ✓'}</button>
         <button onClick={async () => { await copyText(text); onToast('Copied', 'success'); }} className="flex items-center gap-1 text-sm border border-ink/30 dark:border-white rounded-md px-3 py-1.5 text-ink dark:text-white"><Copy size={14} /> Copy</button>
-        <button onClick={async () => { await api.clearClipboard(code); setText(''); onToast('Cleared'); }} className="flex items-center gap-1 text-sm border border-ink/30 dark:border-white rounded-md px-3 py-1.5 text-ink dark:text-white"><Eraser size={14} /> Clear</button>
+        <button onClick={async () => { await api.clearClipboard(code); setText(''); setDirty(false); onToast('Cleared'); }} className="flex items-center gap-1 text-sm border border-ink/30 dark:border-white rounded-md px-3 py-1.5 text-ink dark:text-white"><Eraser size={14} /> Clear</button>
         <button onClick={async () => { await copyText(url); onToast('Room URL copied', 'success'); }} className="flex items-center gap-1 text-sm border border-ink/30 dark:border-white rounded-md px-3 py-1.5 text-ink dark:text-white"><Share2 size={14} /> Share</button>
         <button onClick={() => setShowQR(true)} className="flex items-center gap-1 text-sm border border-ink/30 dark:border-white rounded-md px-3 py-1.5 text-ink dark:text-white"><QrCode size={14} /> QR</button>
         <button onClick={removeRoom} className="flex items-center gap-1 text-sm border border-ink/30 dark:border-white rounded-md px-3 py-1.5 text-ink dark:text-white ml-auto"><Trash2 size={14} /> Delete room</button>
