@@ -4,7 +4,7 @@
 // service switches to polling when VITE_WS_URL=poll). Mutations return the
 // new version so pollers converge without refresh.
 const { put, del } = require('@vercel/blob');
-const S = require('./_lib/store');
+const S = require('./store');
 const { kv } = S;
 
 const MAX_CONTENT = () => parseInt(process.env.MAX_CONTENT_BYTES || '500000', 10);
