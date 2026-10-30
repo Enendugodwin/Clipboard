@@ -1,0 +1,67 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Clean minimal beige light system. Dark mode stays monochrome black. */
+html {
+  background: #f2eee5;
+  color-scheme: light;
+}
+html.dark {
+  background: #000;
+  color-scheme: dark;
+}
+body {
+  -webkit-tap-highlight-color: transparent;
+  color: #1c1917;
+  overflow-x: clip;
+  background-color: #f2eee5;
+  background-image:
+    radial-gradient(54rem 30rem at 50% -10rem, rgba(255, 253, 247, 0.95), rgba(255, 253, 247, 0) 70%),
+    radial-gradient(42rem 26rem at 88% 28%, rgba(206, 193, 164, 0.35), rgba(206, 193, 164, 0) 70%),
+    radial-gradient(46rem 28rem at 6% 22%, rgba(220, 209, 186, 0.35), rgba(220, 209, 186, 0) 70%);
+  animation: wash-drift 36s ease-in-out infinite alternate;
+}
+.dark body {
+  background: #000;
+  background-image: none;
+  color: #fff;
+  animation: none;
+}
+::selection { background: #1e4030; color: #f7f4ec; }
+.dark ::selection { background: #fff; color: #000; }
+
+input, textarea, select {
+  background: #fffdf7;
+  color: #1c1917;
+}
+.dark input, .dark textarea, .dark select {
+  background: #000;
+  color: #fff;
+}
+input::placeholder, textarea::placeholder { opacity: 0.5; }
+
+*:focus-visible {
+  outline: 2px solid currentColor;
+  outline-offset: 2px;
+}
+
+img, svg, video, pre {
+  max-width: 100%;
+}
+
+@keyframes wash-drift {
+  from { background-position: 0 0, 0 0, 0 0; }
+  to { background-position: 0 3rem, 2rem -2rem, -2rem 2rem; }
+}
+@keyframes fade-up {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.animate-fade-up {
+  animation: fade-up 0.55s ease both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * { animation: none !important; transition: none !important; }
+}

@@ -1,0 +1,24 @@
+# deps
+node_modules/
+
+# builds
+frontend/dist/
+dist/
+
+# cloudflare
+.wrangler/
+.dev.vars
+
+# local runtime data (never commit)
+server/data.json
+
+# env / secrets (never commit)
+.env
+.env.*
+!.env.example
+
+# logs / coverage / OS
+*.log
+coverage/
+.DS_Store
+Thumbs.db

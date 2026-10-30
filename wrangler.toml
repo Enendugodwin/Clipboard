@@ -1,0 +1,25 @@
+name = "clipboard"
+main = "backend/workers/api.js"
+compatibility_date = "2024-11-01"
+
+[[durable_objects.bindings]]
+name = "ROOM_DO"
+class_name = "RoomDO"
+
+[[migrations]]
+tag = "v1"
+new_classes = ["RoomDO"]
+
+[[d1_databases]]
+binding = "DB"
+database_name = "clipboard"
+database_id = "REPLACE_WITH_D1_ID"
+
+[[r2_buckets]]
+binding = "FILES"
+bucket_name = "clipboard-files"
+
+[vars]
+ENV = "production"
+MAX_CONTENT_BYTES = "500000"
+MAX_FILE_BYTES = "26214400"

@@ -1,0 +1,18 @@
+{
+  "name": "clipboard-server",
+  "version": "1.0.0",
+  "private": true,
+  "type": "commonjs",
+  "main": "src/index.js",
+  "scripts": {
+    "dev": "node src/index.js",
+    "start": "node src/index.js",
+    "test": "node --test ../../tests/"
+  },
+  "dependencies": {
+    "clipboard": "file:..",
+    "cors": "^2.8.5",
+    "express": "^4.19.2",
+    "ws": "^8.18.0"
+  }
+}
