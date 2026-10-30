@@ -13,7 +13,7 @@ new_classes = ["RoomDO"]
 [[d1_databases]]
 binding = "DB"
 database_name = "clipboard"
-database_id = "REPLACE_WITH_D1_ID"
+database_id = "02dcd8e0-9eef-4085-a2ab-56190e4f1a5b"
 
 [[r2_buckets]]
 binding = "FILES"

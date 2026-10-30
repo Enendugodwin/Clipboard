@@ -10,8 +10,36 @@ export function useRoomSocket(code: string | undefined, onEvent: (msg: any) => v
   const handlerRef = useRef(onEvent);
   handlerRef.current = onEvent;
 
+  const pollRef = useRef(0);
+  const versionRef = useRef<number | null>(null);
+
+  const poll = useCallback(async () => {
+    if (!code) return;
+    if (!navigator.onLine) { setState('Offline'); return; }
+    const apiBase = ((import.meta.env.VITE_API_URL as string | undefined) ?? '').replace(/\/$/, '');
+    try {
+      const res = await fetch(`${apiBase}/api/rooms/${code}/clipboard`);
+      if (res.status === 410 || res.status === 404) { setState('Disconnected'); handlerRef.current({ type: 'room.expired' }); return; }
+      if (!res.ok) { setState('Connected'); return; }
+      const d = await res.json();
+      if (versionRef.current === null) { versionRef.current = d.version; setState('Connected'); return; }
+      if (d.version !== versionRef.current) {
+        versionRef.current = d.version;
+        setState('Synced');
+        handlerRef.current({ type: 'clipboard.updated', content: d.content, content_type: d.content_type, version: d.version, last_sync_at: d.last_sync_at });
+      } else setState('Connected');
+    } catch { setState('Reconnecting'); }
+  }, [code]);
+
   const connect = useCallback(() => {
     if (!code) return;
+    if ((import.meta.env.VITE_WS_URL as string | undefined) === 'poll') {
+      setState('Reconnecting');
+      window.clearInterval(pollRef.current);
+      pollRef.current = window.setInterval(poll, 2000);
+      poll();
+      return;
+    }
     if (!navigator.onLine) setState('Offline');
     const proto = location.protocol === 'https:' ? 'wss' : 'ws';
     const wsBase = ((import.meta.env.VITE_WS_URL as string | undefined) ?? `${proto}://${location.host}`).replace(/\/$/, '');
@@ -27,7 +55,7 @@ export function useRoomSocket(code: string | undefined, onEvent: (msg: any) => v
       timerRef.current = window.setTimeout(connect, delay);
     };
     ws.onerror = () => ws.close();
-  }, [code]);
+  }, [code, poll]);
 
   useEffect(() => {
     connect();
@@ -37,6 +65,7 @@ export function useRoomSocket(code: string | undefined, onEvent: (msg: any) => v
     window.addEventListener('offline', onOffline);
     return () => {
       window.clearTimeout(timerRef.current);
+      window.clearInterval(pollRef.current);
       window.removeEventListener('online', onOnline);
       window.removeEventListener('offline', onOffline);
       wsRef.current?.close();

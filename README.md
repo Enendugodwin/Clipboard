@@ -56,6 +56,23 @@ Notes:
 
 Local dev uses `server/` (same REST/WS shapes as the Worker); production uses `backend/workers/api.js` + `backend/durable-objects/RoomDO.js` + D1 (`backend/migrations/0001_init.sql`) + R2.
 
+## Production deploy (Vercel, all-in)
+
+No Cloudflare account needed. The `api/` directory holds the same REST API as
+serverless functions (KV-backed); realtime sync becomes 2s polling.
+
+1. Import [Enendugodwin/Clipboard](https://github.com/Enendugodwin/Clipboard) in Vercel (root directory `/`).
+2. Storage → Create **KV** database and **Blob** store, connect both to the project (injects `KV_*` and `BLOB_*` env vars).
+3. Environment Variables:
+   - `VITE_WS_URL` = `poll` (polling instead of WebSockets on serverless)
+   - `VITE_API_URL` = `` (empty — same-origin `/api`)
+   - `CRON_SECRET` = random string (expiry sweeper auth; Vercel Cron sends it automatically once set)
+4. Deploy. `vercel.json` already sets build (`npm run build`), output (`frontend/dist`), SPA rewrites (`/c/*`, `/history`, `/settings`, `/about`), and a daily expiry sweep (`/api/cron/sweep`).
+
+Limits vs other targets: sync latency ~2s (polling), serverless max duration
+applies per request, file caps via `MAX_FILE_BYTES`. Local `npm run dev`
+(Express + WebSocket) remains the lowest-latency dev loop.
+
 ## Structure
 
 - [frontend/src](frontend/src) — components, pages, hooks, services, types, utils, styles

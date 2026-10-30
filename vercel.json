@@ -1,0 +1,12 @@
+{
+  "installCommand": "npm install && npm run install:all",
+  "buildCommand": "npm run build",
+  "outputDirectory": "frontend/dist",
+  "rewrites": [
+    { "source": "/c/:code*", "destination": "/" },
+    { "source": "/history", "destination": "/" },
+    { "source": "/settings", "destination": "/" },
+    { "source": "/about", "destination": "/" }
+  ],
+  "crons": [{ "path": "/api/cron/sweep", "schedule": "0 4 * * *" }]
+}
