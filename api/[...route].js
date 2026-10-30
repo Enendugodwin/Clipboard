@@ -27,8 +27,9 @@ async function okPassword(room, req, body) {
 module.exports = async function handler(req, res) {
   res.setHeader('X-Robots-Tag', 'noindex, nofollow');
   if (req.method === 'OPTIONS') return res.status(204).end();
-  const parts = (req.query.route || []);
-  const seg = Array.isArray(parts) ? parts : [parts];
+  // Parse from the URL path, not req.query: catch-all param shape varies.
+  const pathname = new URL(req.url || '/', 'http://localhost').pathname;
+  const seg = pathname.replace(/^\/api\/?/, '').split('/').filter(Boolean).map((s) => { try { return decodeURIComponent(s); } catch { return s; } });
   const bad = (code, msg, extra = {}) => res.status(code).json({ error: msg, ...extra });
   const body = req.body || {};
 
