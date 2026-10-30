@@ -100,7 +100,7 @@ export function RoomPage({ onToast, onConn }: { onToast: (m: string, k?: any) =>
       <div className="flex flex-wrap gap-2">
         <button onClick={() => save(text)} disabled={!dirty} title={dirty ? 'Push your edits to all devices' : 'Everything is already synced'} className={`flex items-center gap-1 text-sm rounded-md px-4 py-1.5 font-medium border ${dirty ? 'bg-moss-deep dark:bg-white text-[#f7f4ec] dark:text-black border-moss-deep dark:border-white' : 'border-ink/30 dark:border-white text-ink/60 dark:text-white/60'}`}><Share2 size={14} /> {dirty ? 'Sync now' : 'Synced ✓'}</button>
         <button onClick={async () => { await copyText(text); onToast('Copied', 'success'); }} className="flex items-center gap-1 text-sm border border-ink/30 dark:border-white rounded-md px-3 py-1.5 text-ink dark:text-white"><Copy size={14} /> Copy</button>
-        <button onClick={async () => { await api.clearClipboard(code); setText(''); setDirty(false); onToast('Cleared'); }} className="flex items-center gap-1 text-sm border border-ink/30 dark:border-white rounded-md px-3 py-1.5 text-ink dark:text-white"><Eraser size={14} /> Clear</button>
+        <button onClick={async () => { const r = await api.clearClipboard(code); setText(''); setVersion(r.version); setDirty(false); onToast('Cleared'); }} className="flex items-center gap-1 text-sm border border-ink/30 dark:border-white rounded-md px-3 py-1.5 text-ink dark:text-white"><Eraser size={14} /> Clear</button>
         <button onClick={async () => { await copyText(url); onToast('Room URL copied', 'success'); }} className="flex items-center gap-1 text-sm border border-ink/30 dark:border-white rounded-md px-3 py-1.5 text-ink dark:text-white"><Share2 size={14} /> Share</button>
         <button onClick={() => setShowQR(true)} className="flex items-center gap-1 text-sm border border-ink/30 dark:border-white rounded-md px-3 py-1.5 text-ink dark:text-white"><QrCode size={14} /> QR</button>
         <button onClick={removeRoom} className="flex items-center gap-1 text-sm border border-ink/30 dark:border-white rounded-md px-3 py-1.5 text-ink dark:text-white ml-auto"><Trash2 size={14} /> Delete room</button>
@@ -109,7 +109,7 @@ export function RoomPage({ onToast, onConn }: { onToast: (m: string, k?: any) =>
         <h3 className="font-semibold mb-2 text-ink dark:text-white">Preview</h3>
         <ContentView text={text} onToast={onToast} />
       </div>
-      <HistoryList code={code} refreshKey={histKey} onRestore={(t) => { setText(t); save(t); }} onToast={onToast} />
+      <HistoryList code={code} refreshKey={histKey} onRestore={(t) => { setText(t); setDirty(true); save(t); }} onToast={onToast} />
       <DevicesPanel code={code} onToast={onToast} />
       <FilePanel code={code} onToast={onToast} onEvent={(s) => setOpState(s)} />
       {showQR && <QRModal url={url} onClose={() => setShowQR(false)} onToast={onToast} />}

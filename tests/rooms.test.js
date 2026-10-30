@@ -67,3 +67,25 @@ test('concurrent update contract: stale base_version 409s with current version; 
   assert.equal(retry.status, 200);
   assert.equal(retry.body.version, 2);
 });
+
+test('clear-then-sync contract: clear returns the bumped version; stale base after clear 409s', async (t) => {
+  const base = await startApp(t);
+  const created = await (await fetch(`${base}/api/rooms`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ name: 'clear-sync' }) })).json();
+  const code = created.room.room_code;
+
+  const first = await putClip(base, code, 'v1', 0);
+  assert.equal(first.body.version, 1);
+  const cleared = await (await fetch(`${base}/api/rooms/${code}/clipboard`, { method: 'DELETE' })).json();
+  assert.equal(typeof cleared.version, 'number');
+  assert.equal(cleared.version, 2);
+
+  // The pre-clear base must be rejected, not silently applied.
+  const stale = await putClip(base, code, 'after-clear', 1);
+  assert.equal(stale.status, 409);
+  assert.equal(stale.body.version, 2);
+
+  // Syncing on the version returned by clear succeeds.
+  const retry = await putClip(base, code, 'after-clear', cleared.version);
+  assert.equal(retry.status, 200);
+  assert.equal(retry.body.version, 3);
+});
